@@ -1,0 +1,84 @@
+<h1>Carrito de compras</h1>
+
+{{#if cart.products.length}}
+    <ul>
+    {{#each cart.products}}
+        <li>
+            <strong>{{this.product.title}}</strong> - Precio: ${{this.product.price}} <br />
+            Cantidad: 
+            <input type="number" min="1" value="{{this.quantity}}" id="qty-{{this.product._id}}" />
+            <button onclick="updateQuantity('{{../cart._id}}', '{{this.product._id}}')">Actualizar cantidad</button>
+            <button onclick="removeProduct('{{../cart._id}}', '{{this.product._id}}')">Eliminar producto</button>
+        </li>
+    {{/each}}
+    </ul>
+
+    <button onclick="emptyCart('{{cart._id}}')">Vaciar carrito</button>
+{{else}}
+    <p>Tu carrito está vacío.</p>
+{{/if}}
+
+<script>
+    async function removeProduct(cartId, productId) {
+        try {
+            const res = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                alert('Producto eliminado');
+                location.reload();
+            } else {
+                const error = await res.json();
+                alert('Error: ' + error.error);
+            }
+        } catch (err) {
+            alert('Error al eliminar producto');
+            console.error(err);
+        }
+    }
+
+    async function updateQuantity(cartId, productId) {
+        const input = document.getElementById(`qty-${productId}`);
+        const quantity = parseInt(input.value);
+        if (isNaN(quantity) || quantity < 1) {
+            alert('Cantidad inválida');
+            return;
+        }
+        try {
+            const res = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quantity })
+            });
+            if (res.ok) {
+                alert('Cantidad actualizada');
+                location.reload();
+            } else {
+                const error = await res.json();
+                alert('Error: ' + error.error);
+            }
+        } catch (err) {
+            alert('Error al actualizar cantidad');
+            console.error(err);
+        }
+    }
+
+    async function emptyCart(cartId) {
+        if (!confirm('¿Estás seguro de vaciar el carrito?')) return;
+        try {
+            const res = await fetch(`/api/carts/${cartId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                alert('Carrito vaciado');
+                location.reload();
+            } else {
+                const error = await res.json();
+                alert('Error: ' + error.error);
+            }
+        } catch (err) {
+            alert('Error al vaciar carrito');
+            console.error(err);
+        }
+    }
+</script>
