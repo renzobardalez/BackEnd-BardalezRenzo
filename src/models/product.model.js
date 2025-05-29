@@ -5,9 +5,10 @@ const productSchema = new mongoose.Schema({
     title: String,
     description: String,
     price: Number,
+    thumbnail: String,
+    code: String,
     stock: Number,
-    category: String,
-    status: { type: Boolean, default: true }
+    category: String
 });
 
 productSchema.plugin(mongoosePaginate);
